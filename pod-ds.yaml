@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ds
+
+---
+
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: app-ds
+  namespace: ds
+spec:
+  selector:
+    matchLabels:
+      app: app-ds
+      owner: wangxc
+  template:
+    metadata:
+      namespace: ds
+      labels:
+        app: app-ds
+        owner: wangxc
+      annotations:
+        url: zhzhdwy.com
+    spec:
+      nodeSelector:
+        node: app-ds
+      containers:
+      - name: myapp
+        image: ikubernetes/myapp:v1
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+          name: http
+  
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-ds
+  namespace: ds
+spec:
+  selector:
+    app: app-ds
+    owner: wangxc
+  type: NodePort
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8080
